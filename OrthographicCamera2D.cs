@@ -11,16 +11,34 @@ namespace LyiarOwl.Camera;
 /// and another to use with the debug view of any physics engine that derives 
 /// from Aether.Physics (like the Aether.Physics itself or Velcro Physics).</para>
 /// 
-/// <para><see cref="https://docs.monogame.net/api/Microsoft.Xna.Framework.Graphics.SpriteBatch.html#parameters-2"/></para>
-/// <para><see cref="https://docs.monogame.net/api/Microsoft.Xna.Framework.Graphics.BasicEffect.html"/></para>
-/// <para><see cref="https://github.com/nkast/Aether.Physics2D"/></para>
-/// <para><see cref="https://github.com/Genbox/VelcroPhysics"/></para>
+/// <para><see cref="SpriteBatch.Begin"/></para>
+/// <para><see cref="BasicEffect"/></para>
+/// <para><see href="https://github.com/nkast/Aether.Physics2D"/></para>
+/// <para><see href="https://github.com/Genbox/VelcroPhysics"/></para>
 /// </summary>
 public class OrthographicCamera2D
 {
+    /// <summary>
+    /// <para>
+    /// Creates a <c>BasicEffect</c> with <c>TextureEnabled</c> and <c>VertexColorEnabled</c> enabled.
+    /// </para>
+    /// <seealso cref="BasicEffect"/>
+    /// <seealso cref="Microsoft.Xna.Framework.Graphics.BasicEffect.TextureEnabled"/>
+    /// <seealso cref="Microsoft.Xna.Framework.Graphics.BasicEffect.VertexColorEnabled"/>
+    /// </summary>
+    /// <param name="graphicsDevice"></param>
+    /// <returns></returns>
+    public static BasicEffect CreateDefaultEffect(GraphicsDevice graphicsDevice)
+    {
+        return new BasicEffect(graphicsDevice)
+        {
+            TextureEnabled = true,
+            VertexColorEnabled = true
+        };
+    }
+    
     #region Private Members
 
-    private readonly BasicEffect? mBasicEffect;
     private readonly FitViewport? mViewport;
     private readonly GraphicsDevice mGraphicsDevice;
     private float mInvPpm;
@@ -31,6 +49,7 @@ public class OrthographicCamera2D
 
     #region Public Members
 
+    public BasicEffect? BasicEffect;
     /// <summary>
     /// <para>This is a <c>OrthographicOffCenter</c> projection.</para>
     /// <para>If you are using some effect (like the <c>BasicEffect</c>), this projection
@@ -93,7 +112,7 @@ public class OrthographicCamera2D
     public OrthographicCamera2D(GraphicsDevice graphicsDevice, BasicEffect? basicEffect, FitViewport? viewport = null)
         : this(graphicsDevice)
     {
-        mBasicEffect = basicEffect;
+        BasicEffect = basicEffect;
         mViewport = viewport;
 
         if (basicEffect is null)
@@ -113,7 +132,7 @@ public class OrthographicCamera2D
         // case: the dev want to integrate the spritebatch with the debug view of some physics engine and want a fitting view
         // detail: the view will be restricted to the resolution (regardless of the size of the window, the image will be
         // rescaled to fit it proportionally), but keeping usage support for the physics engine's debug view
-        if (mBasicEffect != null && mViewport != null)
+        if (BasicEffect != null && mViewport != null)
         {
             return;
         }
@@ -121,7 +140,7 @@ public class OrthographicCamera2D
         // case: the dev want to integrate the spritebatch with the debug view of some physics engine
         // detail: the view will be extensive (the more large is the window, more pixels will be visible), but keeping
         // usage support for the physics engine's debug view
-        if (mBasicEffect != null)
+        if (BasicEffect != null)
         {
             HandleBasicEffectOnly();
             return;
@@ -158,7 +177,7 @@ public class OrthographicCamera2D
 
     private void HandleBasicEffectOnly()
     {
-        if (mBasicEffect is null) return;
+        if (BasicEffect is null) return;
         
         
         PresentationParameters parameters = mGraphicsDevice.PresentationParameters;
@@ -181,8 +200,8 @@ public class OrthographicCamera2D
         Matrix physicsViewScale = Matrix.CreateScale(mPpm * Zoom);
         PhysicsDebugView = physicsViewTranslation * physicsViewScale * origin;
 
-        mBasicEffect.Projection = Projection;
-        mBasicEffect.View = SpriteBatchView;
+        BasicEffect.Projection = Projection;
+        BasicEffect.View = SpriteBatchView;
     }
     
     private void HandleViewportOnly()
