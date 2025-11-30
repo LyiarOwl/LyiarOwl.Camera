@@ -29,8 +29,6 @@ public class FitViewport
         mInternalResolution = new Vector2(width, height);
         mInvInternalResolution = Vector2.One / mInternalResolution;
 
-        Update();
-
         window.ClientSizeChanged += (_, _) =>
         {
             Rectangle clientBounds = window.ClientBounds;
@@ -40,17 +38,13 @@ public class FitViewport
             if (!mIsResizing)
             {
                 mIsResizing = true;
-                Update();
+                Apply();
                 mIsResizing = false;
             }
         };
     }
 
-    /// <summary>
-    /// If you had associated this viewport to some camera, don't call this method
-    /// because the camera itself will call it internally!
-    /// </summary>
-    private void Update()
+    private void Apply()
     {
         PresentationParameters parameters = mGraphicsDevice.PresentationParameters;
         float clientWidth = parameters.BackBufferWidth;
