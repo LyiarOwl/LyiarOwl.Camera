@@ -36,7 +36,7 @@ public class OrthographicCamera2D
             VertexColorEnabled = true
         };
     }
-    
+
     #region Private Members
 
     private readonly FitViewport? mViewport;
@@ -50,6 +50,7 @@ public class OrthographicCamera2D
     #region Public Members
 
     public BasicEffect? BasicEffect;
+
     /// <summary>
     /// <para>This is a <c>OrthographicOffCenter</c> projection.</para>
     /// <para>If you are using some effect (like the <c>BasicEffect</c>), this projection
@@ -71,6 +72,7 @@ public class OrthographicCamera2D
 
     public float Zoom = 1f;
     public Vector2 Position;
+
     /// <summary>
     /// Rotates the camera in radians.
     /// </summary>
@@ -115,6 +117,8 @@ public class OrthographicCamera2D
         BasicEffect = basicEffect;
         mViewport = viewport;
 
+        viewport?.Apply();
+
         if (basicEffect is null)
             return;
 
@@ -158,6 +162,26 @@ public class OrthographicCamera2D
         HandleViewportAndBasicEffectAbsent();
     }
 
+    public Vector2 Unproject()
+    {
+        return Vector2.Zero;
+    }
+
+    public Vector2 ScreenToWorldPosition(float x, float y) => ScreenToWorldPosition(new Vector2(x, y));
+
+    public Vector2 ScreenToWorldPosition(Vector2 screenPosition)
+    {
+        Matrix invView = Matrix.Invert(SpriteBatchView);
+        
+        if (mViewport is not null)
+        {
+            screenPosition.X -= mViewport.Viewport.X;
+            screenPosition.Y -= mViewport.Viewport.Y;
+        }
+
+        return Vector2.Transform(screenPosition, invView);
+    }
+
     private void HandleViewportAndBasicEffectAbsent()
     {
         PresentationParameters parameters = mGraphicsDevice.PresentationParameters;
@@ -176,12 +200,12 @@ public class OrthographicCamera2D
     private void HandleBasicEffectOnly()
     {
         if (BasicEffect is null) return;
-        
+
         PresentationParameters parameters = mGraphicsDevice.PresentationParameters;
 
-        Projection = Matrix.CreateOrthographicOffCenter(0f, parameters.BackBufferWidth, 
+        Projection = Matrix.CreateOrthographicOffCenter(0f, parameters.BackBufferWidth,
             parameters.BackBufferHeight, 0f, 0f, 1f);
-            
+
         Matrix origin = Matrix.CreateTranslation(
             parameters.BackBufferWidth * 0.5f,
             parameters.BackBufferHeight * 0.5f,
@@ -190,21 +214,21 @@ public class OrthographicCamera2D
         Matrix translation = Matrix.CreateTranslation(-Position.X, -Position.Y, 0f);
         Matrix zoom = Matrix.CreateScale(Zoom);
 
-        SpriteBatchView = mViewport is not null ? 
-            translation * zoom * mViewport.ScalingMatrix * origin : 
-            translation * zoom * origin;
+        SpriteBatchView = mViewport is not null
+            ? translation * zoom * mViewport.ScalingMatrix * origin
+            : translation * zoom * origin;
 
-        Matrix physicsViewTranslation = Matrix.CreateTranslation(-Position.X * mInvPpm, -Position.Y * mInvPpm, 
+        Matrix physicsViewTranslation = Matrix.CreateTranslation(-Position.X * mInvPpm, -Position.Y * mInvPpm,
             0f);
         Matrix physicsViewScale = Matrix.CreateScale(mPpm * Zoom);
-        PhysicsDebugView = mViewport is not null ? 
-            physicsViewTranslation * physicsViewScale * mViewport.ScalingMatrix * origin : 
-            physicsViewTranslation * physicsViewScale * origin;
+        PhysicsDebugView = mViewport is not null
+            ? physicsViewTranslation * physicsViewScale * mViewport.ScalingMatrix * origin
+            : physicsViewTranslation * physicsViewScale * origin;
 
         BasicEffect.Projection = Projection;
         BasicEffect.View = SpriteBatchView;
     }
-    
+
     private void HandleViewportOnly()
     {
         if (mViewport is null) return;

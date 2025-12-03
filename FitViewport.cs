@@ -25,6 +25,7 @@ public class FitViewport
 
     public Matrix ScalingMatrix => mScalingMatrix;
     public Viewport Viewport => mViewport;
+    public event Action<Viewport> WindowResizing;
     
     
     public FitViewport(GameWindow window, GraphicsDevice graphicsDevice, int width, int height)
@@ -44,12 +45,19 @@ public class FitViewport
             {
                 mIsResizing = true;
                 Apply();
+                WindowResizing?.Invoke(mViewport);
                 mIsResizing = false;
             }
         };
     }
 
-    private void Apply()
+    /// <summary>
+    /// <para>Unless you're working on your own camera class or even want to use this
+    /// viewport without a camera, avoid calling this freely!</para>
+    /// <para>This method will be automatically called within the camera that is using it and also when the window is
+    /// resized (manually, when toggling fullscreen or maximizing).</para>
+    /// </summary>
+    public void Apply()
     {
         PresentationParameters parameters = mGraphicsDevice.PresentationParameters;
         float clientWidth = parameters.BackBufferWidth;
