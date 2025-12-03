@@ -130,14 +130,12 @@ public class OrthographicCamera2D
     public void Update()
     {
         // case: the dev want to integrate the spritebatch with the debug view of some physics engine and want a fitting view
+        // (mViewport isn't null)
         // detail: the view will be restricted to the resolution (regardless of the size of the window, the image will be
         // rescaled to fit it proportionally), but keeping usage support for the physics engine's debug view
-        if (BasicEffect != null && mViewport != null)
-        {
-            return;
-        }
 
         // case: the dev want to integrate the spritebatch with the debug view of some physics engine
+        // (mViewport is null)
         // detail: the view will be extensive (the more large is the window, more pixels will be visible), but keeping
         // usage support for the physics engine's debug view
         if (BasicEffect != null)
@@ -179,7 +177,6 @@ public class OrthographicCamera2D
     {
         if (BasicEffect is null) return;
         
-        
         PresentationParameters parameters = mGraphicsDevice.PresentationParameters;
 
         Projection = Matrix.CreateOrthographicOffCenter(0f, parameters.BackBufferWidth, 
@@ -193,12 +190,16 @@ public class OrthographicCamera2D
         Matrix translation = Matrix.CreateTranslation(-Position.X, -Position.Y, 0f);
         Matrix zoom = Matrix.CreateScale(Zoom);
 
-        SpriteBatchView = translation * zoom * origin;
+        SpriteBatchView = mViewport is not null ? 
+            translation * zoom * mViewport.ScalingMatrix * origin : 
+            translation * zoom * origin;
 
         Matrix physicsViewTranslation = Matrix.CreateTranslation(-Position.X * mInvPpm, -Position.Y * mInvPpm, 
             0f);
         Matrix physicsViewScale = Matrix.CreateScale(mPpm * Zoom);
-        PhysicsDebugView = physicsViewTranslation * physicsViewScale * origin;
+        PhysicsDebugView = mViewport is not null ? 
+            physicsViewTranslation * physicsViewScale * mViewport.ScalingMatrix * origin : 
+            physicsViewTranslation * physicsViewScale * origin;
 
         BasicEffect.Projection = Projection;
         BasicEffect.View = SpriteBatchView;
