@@ -18,10 +18,15 @@ public class FitViewport
     private readonly Vector2 mInternalResolution;
     private readonly Vector2 mInvInternalResolution;
     private readonly GraphicsDevice mGraphicsDevice;
-    private bool mIsResizing;
+    private Matrix mScalingMatrix;
+    private Viewport mViewport;
     
-    public Matrix ScalingMatrix;
+    private bool mIsResizing;
 
+    public Matrix ScalingMatrix => mScalingMatrix;
+    public Viewport Viewport => mViewport;
+    
+    
     public FitViewport(GameWindow window, GraphicsDevice graphicsDevice, int width, int height)
     {
         mGraphicsDevice = graphicsDevice;
@@ -69,16 +74,19 @@ public class FitViewport
 
         float scale = MathF.Min(horizontalAspect, verticalAspect);
 
-        ScalingMatrix = Matrix.CreateScale(scale);
+        mScalingMatrix = Matrix.CreateScale(scale);
 
-        Viewport viewport = mGraphicsDevice.Viewport;
-        viewport.X = (int)(clientWidth * 0.5f - adjustedViewportWidth * 0.5f);
-        viewport.Y = (int)(clientHeight * 0.5f - adjustedViewportHeight * 0.5f);
-        viewport.Width = (int)adjustedViewportWidth;
-        viewport.Height = (int)adjustedViewportHeight;
-        viewport.MinDepth = 0f;
-        viewport.MaxDepth = 1f;
-        mGraphicsDevice.Viewport = viewport;
+        CalculateViewport(clientWidth, clientHeight, adjustedViewportWidth, adjustedViewportHeight);
     }
-    
+
+    private void CalculateViewport(float clientWidth, float clientHeight, float adjustedViewportWidth,
+        float adjustedViewportHeight)
+    {
+        mViewport.X = (int)(clientWidth * 0.5f - adjustedViewportWidth * 0.5f);
+        mViewport.Y = (int)(clientHeight * 0.5f - adjustedViewportHeight * 0.5f);
+        mViewport.Width = (int)adjustedViewportWidth;
+        mViewport.Height = (int)adjustedViewportHeight;
+        mViewport.MinDepth = 0f;
+        mViewport.MaxDepth = 1f;
+    }
 }
