@@ -164,31 +164,47 @@ public class OrthographicCamera2D
 
     
     #region Util methods
-    public Vector2 Unproject()
+    /// <summary>
+    /// Converts from <b>Screen Coordinates</b> to <b>Normalized Device Coordinates</b>.
+    /// </summary>
+    public Vector2 ScreenToNDC(Vector2 screenPosition) => ScreenToNDC(screenPosition.X, screenPosition.Y);
+    /// <summary>
+    /// Converts from <b>Screen Coordinates</b> to <b>Normalized Device Coordinates</b>.
+    /// </summary>
+    /// <param name="screenX">X coordinates in the screen space.</param>
+    /// <param name="screenY">Y coordinates in the screen space.</param>
+    public Vector2 ScreenToNDC(float screenX, float screenY)
     {
-        return Vector2.Zero;
+        Viewport viewport = mGraphicsDevice.Viewport;
+        float x = 2f * (screenX - viewport.X) / viewport.Width - 1f;
+        float y = 1f - 2f * (screenY - viewport.Y) / viewport.Height;
+        return new Vector2(x, y);
     }
+    public Vector4 ClipToView(Vector2 ndc, float z = 0f, float w = 1f) => ClipToView(ndc.X, ndc.Y, z, w); 
+    public Vector4 ClipToView(float ndcX, float ndcY, float z = 0f, float w = 1f)
+    {
+        Vector4 clip = new Vector4(ndcX, ndcY, z, w);
 
-    public Vector2 ScreenToWorldPosition(float x, float y) => ScreenToWorldPosition(new Vector2(x, y));
+        Matrix invProj = Matrix.Invert(Projection);
+        Vector4 view = Vector4.Transform(clip, invProj);
+        view /= view.W;
+        return view;
+    }
+    /// <summary>
+    /// Converts from Screen Coordinates to coordinates in the world.
+    /// </summary>
+    public Vector2 ScreenToWorld(float x, float y) => ScreenToWorld(new Vector2(x, y));
 
-    public Vector2 ScreenToWorldPosition(Vector2 screenPosition)
+    /// <summary>
+    /// Converts from Screen Coordinates to coordinates in the world.
+    /// </summary>
+    public Vector2 ScreenToWorld(Vector2 screenPosition)
     {
         Matrix invView = Matrix.Invert(SpriteBatchView);
         if (BasicEffect is not null)
         {
-            // screen -> ndc
-            Viewport viewport = mGraphicsDevice.Viewport;
-            float x = (2f * (screenPosition.X - viewport.X)) / viewport.Width - 1f;
-            float y = 1f - (2f * (screenPosition.Y - viewport.Y)) / viewport.Height;
-
-            Vector4 clip = new Vector4(x, y, 0f, 1f);
-
-            // clip -> view
-            Matrix invProj = Matrix.Invert(Projection);
-            Vector4 view = Vector4.Transform(clip, invProj);
-            view /= view.W;
-
-            // view -> world
+            Vector2 ndc = ScreenToNDC(screenPosition.X, screenPosition.Y);
+            Vector4 view = ClipToView(ndc);
             Vector4 world = Vector4.Transform(view, invView);
             
             return new Vector2(world.X, world.Y);
