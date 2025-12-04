@@ -162,6 +162,8 @@ public class OrthographicCamera2D
         HandleViewportAndBasicEffectAbsent();
     }
 
+    
+    #region Util methods
     public Vector2 Unproject()
     {
         return Vector2.Zero;
@@ -172,7 +174,26 @@ public class OrthographicCamera2D
     public Vector2 ScreenToWorldPosition(Vector2 screenPosition)
     {
         Matrix invView = Matrix.Invert(SpriteBatchView);
-        
+        if (BasicEffect is not null)
+        {
+            // screen -> ndc
+            Viewport viewport = mGraphicsDevice.Viewport;
+            float x = (2f * (screenPosition.X - viewport.X)) / viewport.Width - 1f;
+            float y = 1f - (2f * (screenPosition.Y - viewport.Y)) / viewport.Height;
+
+            Vector4 clip = new Vector4(x, y, 0f, 1f);
+
+            // clip -> view
+            Matrix invProj = Matrix.Invert(Projection);
+            Vector4 view = Vector4.Transform(clip, invProj);
+            view /= view.W;
+
+            // view -> world
+            Vector4 world = Vector4.Transform(view, invView);
+            
+            return new Vector2(world.X, world.Y);
+        }
+
         if (mViewport is not null)
         {
             screenPosition.X -= mViewport.Viewport.X;
@@ -181,7 +202,10 @@ public class OrthographicCamera2D
 
         return Vector2.Transform(screenPosition, invView);
     }
+    #endregion
 
+    
+    #region Handling Views and Projection
     private void HandleViewportAndBasicEffectAbsent()
     {
         PresentationParameters parameters = mGraphicsDevice.PresentationParameters;
@@ -244,6 +268,6 @@ public class OrthographicCamera2D
         Matrix zoom = Matrix.CreateScale(Zoom);
         SpriteBatchView = translation * zoom * mViewport.ScalingMatrix * origin;
     }
-
+    #endregion
     #endregion
 }
