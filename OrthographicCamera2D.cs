@@ -6,17 +6,6 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace LyiarOwl.Camera;
 
-/// <summary>
-/// <para>2d camera with an orthographic <c>Projection</c> and two more views, one
-/// to use with your <c>SpriteBatch</c> (via <c>transformMatrix</c> or <c>BasicEffect</c>) 
-/// and another to use with the debug view of any physics engine that derives 
-/// from Aether.Physics (like the Aether.Physics itself or Velcro Physics).</para>
-/// 
-/// <para><see cref="SpriteBatch.Begin"/></para>
-/// <para><see cref="BasicEffect"/></para>
-/// <para><see href="https://github.com/nkast/Aether.Physics2D"/></para>
-/// <para><see href="https://github.com/Genbox/VelcroPhysics"/></para>
-/// </summary>
 public class OrthographicCamera2D
 {
     /// <summary>
@@ -28,7 +17,7 @@ public class OrthographicCamera2D
     /// <seealso cref="Microsoft.Xna.Framework.Graphics.BasicEffect.VertexColorEnabled"/>
     /// </summary>
     /// <param name="graphicsDevice"></param>
-    /// <returns></returns>
+    /// <returns>A new instance of a <c>BasicEffect</c></returns>
     public static BasicEffect CreateDefaultEffect(GraphicsDevice graphicsDevice)
     {
         return new BasicEffect(graphicsDevice)
@@ -44,11 +33,17 @@ public class OrthographicCamera2D
     private readonly GraphicsDevice mGraphicsDevice;
     private float mInvPpm;
     private float mPpm;
-
+    private float mMinimalPpm = 1f;
+    private float mZoom = 1f;
+    private float mMinimalZoom = 0.1f;
     #endregion
 
 
     #region Public Members
+    /// <summary>
+    /// <para>Is the top-left corner of the visible area in the screen.</para>
+    /// <para>Shorthand for: <code>new Vector2(Left, Top)</code></para>
+    /// </summary>
     public Vector2 Min
     {
         get
@@ -59,6 +54,10 @@ public class OrthographicCamera2D
             return world;
         }
     }
+    /// <summary>
+    /// <para>Is the bottom-right corner of the visible area in the screen.</para>
+    /// <para>Shorthand for: <code>new Vector2(Right, Bottom)</code></para>
+    /// </summary>
     public Vector2 Max
     {
         get
@@ -74,11 +73,35 @@ public class OrthographicCamera2D
             return world;
         }
     }
+    /// <summary>
+    /// <para>Is the left side of the visible area in the screen.</para>
+    /// <para>Shorthand for: <code>Min.X</code></para>
+    /// </summary>
     public float Left => Min.X;
+    /// <summary>
+    /// <para>Is the right side of the visible area in the screen.</para>
+    /// <para>Shorthand for: <code>Max.X</code></para>
+    /// </summary>
     public float Right => Max.X;
+    /// <summary>
+    /// <para>Is the top side of the visible area in the screen.</para>
+    /// <para>Shorthand for: <code>Min.Y</code></para>
+    /// </summary>
     public float Top => Min.Y;
+    /// <summary>
+    /// <para>Is the bottom side of the visible area in the screen.</para>
+    /// <para>Shorthand for: <code>Max.Y</code></para>
+    /// </summary>
     public float Bottom => Max.Y;
+    /// <summary>
+    /// <para>Is the width of the visible area in the screen.</para>
+    /// <para>Shorthand for: <code>Abs(Left - Right)</code></para>
+    /// </summary>
     public float Width => MathF.Abs(Left - Right);
+    /// <summary>
+    /// <para>Is the height of the visible area in the screen.</para>
+    /// <para>Shorthand for: <code>Abs(Top - Bottom)</code></para>
+    /// </summary>
     public float Height => MathF.Abs(Top - Bottom);
 
     public BasicEffect? BasicEffect;
@@ -86,7 +109,7 @@ public class OrthographicCamera2D
     /// <summary>
     /// <para>This is a <c>OrthographicOffCenter</c> projection.</para>
     /// <para>If you are using some effect (like the <c>BasicEffect</c>), this projection
-    /// should be used.</para>
+    /// must be used.</para>
     /// </summary>
     public Matrix Projection;
 
@@ -95,6 +118,12 @@ public class OrthographicCamera2D
     /// or to the <c>View</c> attribute from your effect (like the <c>BasicEffect</c>).
     /// </summary>
     public Matrix SpriteBatchView;
+    /// <summary>
+    /// <para>This View must be applied to the <c>transformMatrix</c> from the <c>SpriteBatch</c>
+    /// or to the <c>View</c> attribute from your effect (like the <c>BasicEffect</c>).</para>
+    /// <para>Shorthand for: <b>getter for SpriteBatchView</b></para>
+    /// </summary>
+    public Matrix TransformMatrix => SpriteBatchView;
 
     /// <summary>
     /// This view is only useful if you are using the debug view from some physics engine
@@ -102,48 +131,158 @@ public class OrthographicCamera2D
     /// </summary>
     public Matrix PhysicsDebugView;
 
-    public float Zoom = 1f;
+    /// <summary>
+    /// <para>Defines the zoom of this camera.</para>
+    /// <para>Defaults: <b>0.1 (minimal), 1 (default)</b></para>
+    /// </summary>
+    public float Zoom {
+        get => mZoom;
+        set
+        {
+            if (value < mMinimalZoom)
+            {
+                mZoom = mMinimalZoom;
+                return;
+            }
+            mZoom = value;
+        }
+    }
+    public float MinimalZoom => mMinimalZoom;
+    /// <summary>
+    /// Defines the position of this camera.
+    /// </summary>
     public Vector2 Position;
 
     /// <summary>
-    /// Rotates the camera in radians.
+    /// Defines the angle (in radians) of this camera.
     /// </summary>
     public float Angle = 0f;
 
     /// <summary>
-    /// <para>Define the scale in which the <c>PhysicsDebugView</c> will be scaled.</para>
-    /// <para>Ensure to set this attribute according to the scale you want to work.</para>
+    /// <para>
+    /// Define the scale in which the <c>PhysicsDebugView</c> will be scaled. That is, how much pixels will be
+    /// equivalent to 1 meters.
+    /// </para>
+    /// <para>Defaults: <b>1 (minimal), 16 (default)</b></para>
     /// </summary>
     public float Ppm
     {
         get => mPpm;
         set
         {
+            if (value < mMinimalPpm)
+            {
+                mPpm = mMinimalPpm;
+                mInvPpm = 1f / mPpm;
+                return;
+            }
+    
             mPpm = value;
             mInvPpm = 1f / mPpm;
         }
     }
-
+    public float MinimalPpm => mMinimalPpm;
+    public FitViewport? Viewport => mViewport;
     #endregion
 
 
     #region Constructors
 
     /// <summary>
-    /// Creates an orthographic camera with an extensive view, that is, when the game is
-    /// maximized, more the player can see.
+    /// <para>
+    /// Initializes an orthographic camera with an extensive view, that is, when the window is
+    /// resized, more or less pixels will be visible.</para>
+    /// <para>
+    /// Can be used in the simplest way, that is, you can pass the <c>TransformMatrix</c>
+    /// (or <c>SpriteBatchView</c>, both are the same) directly to the <c>transformMatrix</c> parameter of your
+    /// <c>SpriteBatch</c>.
+    /// </para>
+    /// <para>Make sure to call <c>Update</c>.</para>
+    /// <para>Shorthand for: <code>OrthographicCamera(graphicsDevice, null, null)</code></para>
     /// </summary>
     public OrthographicCamera2D(GraphicsDevice graphicsDevice)
     {
         mGraphicsDevice = graphicsDevice;
     }
+    /// <summary>
+    /// <para>
+    /// Initializes an orthographic camera using a fit viewport, that is, when the window is
+    /// resized, the same amount of pixels will remain visible.</para>
+    /// <para>
+    /// Can be used in the simplest way, that is, you can pass the <c>TransformMatrix</c>
+    /// (or <c>SpriteBatchView</c>, both are the same) directly to the <c>transformMatrix</c> parameter of your
+    /// <c>SpriteBatch</c>.
+    /// </para>
+    /// <para>
+    /// Make sure to call <c>Update</c> and also set the <c>Viewport</c> of your <c>GraphicsDevice</c> to use
+    /// the <c>Viewport</c> being defined in this camera.
+    /// </para>
+    /// <para>Shorthand for: <code>OrthographicCamera(graphicsDevice, null, viewport)</code></para>
+    /// </summary>
+    public OrthographicCamera2D(GraphicsDevice graphicsDevice, FitViewport viewport)
+    : this(graphicsDevice, null, viewport) { }
 
-    /// <param name="graphicsDevice"></param>
-    /// <param name="basicEffect">Only useful if you're using some physics engine. If this is the case, make sure
-    /// to change the <c>Ppm</c> attribute (<c>16</c> is the default, that is each 16px is equal to 1 meter).</param>
-    /// <param name="viewport">Very useful if you want that, when the game is maximized, the image
-    /// be scaled to fit the new window size.</param>
-    public OrthographicCamera2D(GraphicsDevice graphicsDevice, BasicEffect? basicEffect, FitViewport? viewport = null)
+    /// <summary>
+    /// <para>
+    /// Initializes an orthographic camera with an extensive view, that is, when the window is
+    /// resized, the same amount of pixels will remain visible.
+    /// </para>
+    /// 
+    /// <para>
+    /// By using a <c>BasicEffect</c>, a <c>Projection</c> is processed internally and can be used
+    /// with anything that needs a projection matrix. Essentially this projection is provided to give support
+    /// to the <b>DebugView</b> from <b>Aether.Physics</b>, <b>Velcro's Physics</b> (and/or any physics library
+    /// that derives from this same debug view).
+    /// </para>
+    /// 
+    /// <para>
+    /// In addition to the <c>TransformMatrix</c> (or <c>SpriteBatchView</c>, both are the same) a 
+    /// <c>PhysicsDebugView</c> is also provided to be used with the draw method of the physics engine debug view.
+    /// </para>
+    /// 
+    /// <para>
+    /// Make sure to call <c>Update</c>, pass the <c>BasicEffect</c> defined in this camera to the <c>effect</c>
+    /// parameter of your <c>SpriteBatch</c> and also change the <c>Ppm</c> property of this camera according with
+    /// the scale unit (in pixels) you are working.
+    /// </para>
+    /// 
+    /// <para>Shorthand for: <code>OrthographicCamera(graphicsDevice, basicEffect, null)</code></para>
+    /// 
+    /// <para><seealso href="https://github.com/nkast/Aether.Physics2D"/></para>
+    /// <para><seealso href="https://github.com/Genbox/VelcroPhysics"/></para>
+    /// </summary>
+    public OrthographicCamera2D(GraphicsDevice graphicsDevice, BasicEffect basicEffect)
+    : this(graphicsDevice, basicEffect, null) { }
+
+    /// <summary>
+    /// <para>
+    /// Initializes an orthographic camera with an extensive view, that is, when the window is
+    /// resized, the same amount of pixels will remain visible.
+    /// </para>
+    /// 
+    /// <para>
+    /// By using a <c>BasicEffect</c>, a <c>Projection</c> is processed internally and can be used
+    /// with anything that needs a projection matrix. Essentially this projection is provided to give support
+    /// to the <b>DebugView</b> from <b>Aether.Physics</b>, <b>Velcro's Physics</b> (and/or any physics library
+    /// that derives from this same debug view).
+    /// </para>
+    /// 
+    /// <para>
+    /// In addition to the <c>TransformMatrix</c> (or <c>SpriteBatchView</c>, both are the same) a 
+    /// <c>PhysicsDebugView</c> is also provided to be used with the draw method of the physics engine debug view.
+    /// </para>
+    /// 
+    /// <para>
+    /// Make sure to call <c>Update</c>, pass the <c>BasicEffect</c> defined in this camera to the <c>effect</c>
+    /// parameter of your <c>SpriteBatch</c>, set the <c>Viewport</c> of your <c>GraphicsDevice</c> to use the 
+    /// <c>Viewport</c> being defined in this camera and also change the <c>Ppm</c> property of this camera 
+    /// according with the scale unit (in pixels) you are working.
+    /// </para>
+    /// 
+    /// <para><seealso href="https://github.com/nkast/Aether.Physics2D"/></para>
+    /// <para><seealso href="https://github.com/Genbox/VelcroPhysics"/></para>
+    /// </summary>
+    public OrthographicCamera2D(GraphicsDevice graphicsDevice, BasicEffect? basicEffect, FitViewport? viewport)
         : this(graphicsDevice)
     {
         BasicEffect = basicEffect;
@@ -165,69 +304,59 @@ public class OrthographicCamera2D
 
     public void Update()
     {
-        // case: the dev want to integrate the spritebatch with the debug view of some physics engine and want a fitting view
-        // (mViewport isn't null)
-        // detail: the view will be restricted to the resolution (regardless of the size of the window, the image will be
-        // rescaled to fit it proportionally), but keeping usage support for the physics engine's debug view
-
-        // case: the dev want to integrate the spritebatch with the debug view of some physics engine
-        // (mViewport is null)
-        // detail: the view will be extensive (the more large is the window, more pixels will be visible), but keeping
-        // usage support for the physics engine's debug view
         if (BasicEffect != null)
         {
-            HandleBasicEffectOnly();
+            ProcessBasicEffectOnly();
             return;
         }
 
-        // case: the dev want simple transformation + fitting viewport
-        // detail: the view will be restricted to the resolution (regardless of the size of the window, the image will be
-        // rescaled to fit it proportionally)
         if (mViewport != null)
         {
-            HandleViewportOnly();
+            ProcessViewportOnly();
             return;
         }
 
-        // case: the dev want just simple transformation (such as transformMatrix)
-        // detail: the view will be extensive (the more large is the window, more pixels will be visible)
-        HandleViewportAndBasicEffectAbsent();
+        ProcessViewportAndBasicEffectAbsence();
     }
 
 
     #region Util methods
-    // private void UpdateMinMax()
-    // {
-    //     Min = ScreenToWorld(Vector2.Zero);
-    //     if (BasicEffect is not null)
-    //     {
-    //         Max = ScreenToWorld(Vector2.One);
-    //     }
-    //     else
-    //     {
-    //         Viewport viewport = mGraphicsDevice.Viewport;
-    //         Max = ScreenToWorld(viewport.Width, viewport.Height);
-    //     }
-    // }
+
     /// <summary>
-    /// Converts from <b>Screen Coordinates</b> to <b>Normalized Device Coordinates</b>.
+    /// <para>Converts from <b>Screen Coordinates</b> to <b>Normalized Device Coordinates</b>.</para>
+    /// <para><c>BasicEffect</c> must be defined for this method to work.</para>
+    /// <para>Shorthand for: <code>ScreenToNDC(screenPosition.X, screenPosition.Y)</code></para>
     /// </summary>
     public Vector2 ScreenToNDC(Vector2 screenPosition) => ScreenToNDC(screenPosition.X, screenPosition.Y);
     /// <summary>
-    /// Converts from <b>Screen Coordinates</b> to <b>Normalized Device Coordinates</b>.
+    /// <para>Converts from <b>Screen Coordinates</b> to <b>Normalized Device Coordinates</b>.</para>
+    /// <para><c>BasicEffect</c> must be defined for this method to work.</para>
     /// </summary>
     /// <param name="screenX">X coordinates in the screen space.</param>
     /// <param name="screenY">Y coordinates in the screen space.</param>
     public Vector2 ScreenToNDC(float screenX, float screenY)
     {
+        if (BasicEffect is null) return Vector2.Zero;
         Viewport viewport = mGraphicsDevice.Viewport;
         float x = 2f * (screenX - viewport.X) / viewport.Width - 1f;
         float y = 1f - 2f * (screenY - viewport.Y) / viewport.Height;
         return new Vector2(x, y);
     }
+    /// <summary>
+    /// <para>Converts from <b>Clip Coordinates</b> to <b>View Coordinates</b>.</para>
+    /// <para>This method uses <c>ScreenToNDC</c> internally.</para>
+    /// <para><c>BasicEffect</c> must be defined for this method to work.</para>
+    /// <para>Shorthand for: <code>ClipToView(ndc.X, ndc.Y)</code></para>
+    /// </summary>
     public Vector4 ClipToView(Vector2 ndc, float z = 0f, float w = 1f) => ClipToView(ndc.X, ndc.Y, z, w);
+    /// <summary>
+    /// <para>Converts from <b>Clip Coordinates</b> to <b>View Coordinates</b>.</para>
+    /// <para>This method uses <c>ScreenToNDC</c> internally.</para>
+    /// <para><c>BasicEffect</c> must be defined for this method to work.</para>
+    /// </summary>
     public Vector4 ClipToView(float ndcX, float ndcY, float z = 0f, float w = 1f)
     {
+        if (BasicEffect is null) return Vector4.Zero;
         Vector4 clip = new Vector4(ndcX, ndcY, z, w);
 
         Matrix invProj = Matrix.Invert(Projection);
@@ -236,12 +365,17 @@ public class OrthographicCamera2D
         return view;
     }
     /// <summary>
-    /// Converts from Screen Coordinates to coordinates in the world.
+    /// <para>Converts from <b>Screen Coordinates</b> to <b>World Coordinates</b>.</para>
+    /// <para>The result will be different if you'd set a <c>BasicEffect</c> for this camera.</para>
+    /// <para>This method uses <c>ScreenToNDC</c> and <c>ClipToView</c> internally.</para>
+    /// <para>Shorthand for: <code>ScreenToWorld(new Vector2(x, y))</code></para>
     /// </summary>
     public Vector2 ScreenToWorld(float x, float y) => ScreenToWorld(new Vector2(x, y));
 
     /// <summary>
-    /// Converts from Screen Coordinates to coordinates in the world.
+    /// <para>Converts from <b>Screen Coordinates</b> to <b>World Coordinates</b>.</para>
+    /// <para>The result will be different if you'd set a <c>BasicEffect</c> for this camera.</para>
+    /// <para>This method uses <c>ScreenToNDC</c> and <c>ClipToView</c> internally.</para>
     /// </summary>
     public Vector2 ScreenToWorld(Vector2 screenPosition)
     {
@@ -266,23 +400,19 @@ public class OrthographicCamera2D
     #endregion
 
 
-    #region Handling Views and Projection
-    private void HandleViewportAndBasicEffectAbsent()
+    #region Processing Projection and Views
+    private void ProcessViewportAndBasicEffectAbsence()
     {
         PresentationParameters parameters = mGraphicsDevice.PresentationParameters;
 
-        Matrix origin = Matrix.CreateTranslation(
-            parameters.BackBufferWidth * 0.5f,
-            parameters.BackBufferHeight * 0.5f,
-            0f
-        );
-        Matrix translation = Matrix.CreateTranslation(-Position.X, -Position.Y, 0f);
-        Matrix zoom = Matrix.CreateScale(Zoom);
+        Matrix origin = GetOrigin(parameters.BackBufferWidth, parameters.BackBufferHeight);
+        Matrix translation = GetTranslation(Position.X, Position.Y);
+        Matrix zoom = GetScale(mZoom);
 
         SpriteBatchView = translation * zoom * origin;
     }
 
-    private void HandleBasicEffectOnly()
+    private void ProcessBasicEffectOnly()
     {
         if (BasicEffect is null) return;
 
@@ -293,11 +423,7 @@ public class OrthographicCamera2D
             PresentationParameters parameters = mGraphicsDevice.PresentationParameters;
             Projection = Matrix.CreateOrthographicOffCenter(0f, parameters.BackBufferWidth,
                 parameters.BackBufferHeight, 0f, 0f, 1f);
-            origin = Matrix.CreateTranslation(
-                parameters.BackBufferWidth * 0.5f,
-                parameters.BackBufferHeight * 0.5f,
-                0f
-            );
+            origin = GetOrigin(parameters.BackBufferWidth, parameters.BackBufferHeight);
         }
         else
         {
@@ -305,15 +431,11 @@ public class OrthographicCamera2D
             Projection = Matrix.CreateOrthographicOffCenter(
                 0f, viewport.Width, viewport.Height, 0f, 0f, 1f
             );
-            origin = Matrix.CreateTranslation(
-                viewport.Width * 0.5f,
-                viewport.Height * 0.5f,
-                0f
-            );
+            origin = GetOrigin(viewport.Width, viewport.Height);
         }
 
-        Matrix translation = Matrix.CreateTranslation(-Position.X, -Position.Y, 0f);
-        Matrix zoom = Matrix.CreateScale(Zoom);
+        Matrix translation = GetTranslation(Position.X, Position.Y);
+        Matrix zoom = GetScale(mZoom);
 
         SpriteBatchView = mViewport is not null
             ? translation * zoom * mViewport.ScalingMatrix * origin
@@ -321,7 +443,7 @@ public class OrthographicCamera2D
 
         Matrix physicsViewTranslation = Matrix.CreateTranslation(-Position.X * mInvPpm, -Position.Y * mInvPpm,
             0f);
-        Matrix physicsViewScale = Matrix.CreateScale(mPpm * Zoom);
+        Matrix physicsViewScale = GetScale(mZoom, mPpm);
         PhysicsDebugView = mViewport is not null
             ? physicsViewTranslation * physicsViewScale * mViewport.ScalingMatrix * origin
             : physicsViewTranslation * physicsViewScale * origin;
@@ -329,21 +451,28 @@ public class OrthographicCamera2D
         BasicEffect.Projection = Projection;
         BasicEffect.View = SpriteBatchView;
     }
-
-    private void HandleViewportOnly()
+    private void ProcessViewportOnly()
     {
         if (mViewport is null) return;
 
         PresentationParameters parameters = mGraphicsDevice.PresentationParameters;
         Viewport viewport = mGraphicsDevice.Viewport;
-        Matrix origin = Matrix.CreateTranslation(
-            parameters.BackBufferWidth * 0.5f - viewport.X,
-            parameters.BackBufferHeight * 0.5f - viewport.Y,
-            0f
-        );
-        Matrix translation = Matrix.CreateTranslation(-Position.X, -Position.Y, 0f);
-        Matrix zoom = Matrix.CreateScale(Zoom);
+        Matrix origin = GetOrigin(parameters.BackBufferWidth, parameters.BackBufferHeight, viewport.X, viewport.Y);
+        Matrix translation = GetTranslation(Position.X, Position.Y);
+        Matrix zoom = GetScale(mZoom);
         SpriteBatchView = translation * zoom * mViewport.ScalingMatrix * origin;
+    }
+    private Matrix GetScale(float scale, float ppm = 1f)
+    {
+        return Matrix.CreateScale(scale * ppm);
+    }
+    private Matrix GetOrigin(float width, float height, float offsetX = 0f, float offsetY = 0)
+    {
+        return Matrix.CreateTranslation(width * 0.5f - offsetX, height * 0.5f - offsetY, 0f);
+    }
+    private Matrix GetTranslation(float x, float y)
+    {
+        return Matrix.CreateTranslation(-x, -y, 0f);
     }
     #endregion
     #endregion
