@@ -28,11 +28,11 @@ public class FitViewport
     public event Action<Viewport> WindowResizing;
     
     
-    public FitViewport(GameWindow window, GraphicsDevice graphicsDevice, int width, int height)
+    public FitViewport(GameWindow window, GraphicsDevice graphicsDevice, int virtualWidth, int virtualHeight)
     {
         mGraphicsDevice = graphicsDevice;
 
-        mInternalResolution = new Vector2(width, height);
+        mInternalResolution = new Vector2(virtualWidth, virtualHeight);
         mInvInternalResolution = Vector2.One / mInternalResolution;
 
         window.ClientSizeChanged += (_, _) =>

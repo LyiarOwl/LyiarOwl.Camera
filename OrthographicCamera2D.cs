@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using System.Reflection.Emit;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -48,6 +49,41 @@ public class OrthographicCamera2D
 
 
     #region Public Members
+    public Vector2 Min
+    {
+        get
+        {
+            Viewport viewport = mGraphicsDevice.Viewport;
+            Vector2 coords = new Vector2(viewport.X, viewport.Y);
+            Vector2 world = ScreenToWorld(coords);
+            return world;
+        }
+    }
+    public Vector2 Max
+    {
+        get
+        {
+            // if (BasicEffect is not null)
+            // {
+            //     return ScreenToWorld(Vector2.One);
+            // }
+            Viewport viewport = mGraphicsDevice.Viewport;
+            PresentationParameters presentation = mGraphicsDevice.PresentationParameters;
+            Vector2 coords = new Vector2(
+                presentation.BackBufferWidth - viewport.X,
+                presentation.BackBufferHeight - viewport.Y
+            );
+
+            Vector2 world = ScreenToWorld(coords);
+            return world;
+        }
+    }
+    public float Left => Min.X;
+    public float Right => Max.X;
+    public float Top => Min.Y;
+    public float Bottom => Max.Y;
+    public float Width => MathF.Abs(Left - Right);
+    public float Height => MathF.Abs(Top - Bottom);
 
     public BasicEffect? BasicEffect;
 
@@ -162,8 +198,21 @@ public class OrthographicCamera2D
         HandleViewportAndBasicEffectAbsent();
     }
 
-    
+
     #region Util methods
+    // private void UpdateMinMax()
+    // {
+    //     Min = ScreenToWorld(Vector2.Zero);
+    //     if (BasicEffect is not null)
+    //     {
+    //         Max = ScreenToWorld(Vector2.One);
+    //     }
+    //     else
+    //     {
+    //         Viewport viewport = mGraphicsDevice.Viewport;
+    //         Max = ScreenToWorld(viewport.Width, viewport.Height);
+    //     }
+    // }
     /// <summary>
     /// Converts from <b>Screen Coordinates</b> to <b>Normalized Device Coordinates</b>.
     /// </summary>
@@ -180,7 +229,7 @@ public class OrthographicCamera2D
         float y = 1f - 2f * (screenY - viewport.Y) / viewport.Height;
         return new Vector2(x, y);
     }
-    public Vector4 ClipToView(Vector2 ndc, float z = 0f, float w = 1f) => ClipToView(ndc.X, ndc.Y, z, w); 
+    public Vector4 ClipToView(Vector2 ndc, float z = 0f, float w = 1f) => ClipToView(ndc.X, ndc.Y, z, w);
     public Vector4 ClipToView(float ndcX, float ndcY, float z = 0f, float w = 1f)
     {
         Vector4 clip = new Vector4(ndcX, ndcY, z, w);
@@ -206,7 +255,7 @@ public class OrthographicCamera2D
             Vector2 ndc = ScreenToNDC(screenPosition.X, screenPosition.Y);
             Vector4 view = ClipToView(ndc);
             Vector4 world = Vector4.Transform(view, invView);
-            
+
             return new Vector2(world.X, world.Y);
         }
 
@@ -220,7 +269,7 @@ public class OrthographicCamera2D
     }
     #endregion
 
-    
+
     #region Handling Views and Projection
     private void HandleViewportAndBasicEffectAbsent()
     {
