@@ -35,15 +35,6 @@ public class OrthographicCamera2D
     private float mMinimalPpm = 1f;
     private float mZoom = 1f;
     private float mMinimalZoom = 0.1f;
-    private Vector2 mMin;
-    private Vector2 mMax;
-    private Vector2 mPosition;
-    #endregion
-
-
-    #region Dirty flags
-    private bool mDirtyMin = true;
-    private bool mDirtyMax = true;
     #endregion
 
 
@@ -56,13 +47,9 @@ public class OrthographicCamera2D
     {
         get
         {
-            if (mDirtyMin)
-            {
-                Viewport viewport = mGraphicsDevice.Viewport;
-                Vector2 coords = new Vector2(viewport.X, viewport.Y);
-                mMin = ScreenToWorld(coords);
-            }
-            return mMin;
+            Viewport viewport = mGraphicsDevice.Viewport;
+            Vector2 coords = new Vector2(viewport.X, viewport.Y);
+            return ScreenToWorld(coords);
         }
     }
     /// <summary>
@@ -73,18 +60,14 @@ public class OrthographicCamera2D
     {
         get
         {
-            if (mDirtyMax)
-            {
-                Viewport viewport = mGraphicsDevice.Viewport;
-                PresentationParameters presentation = mGraphicsDevice.PresentationParameters;
-                Vector2 coords = new Vector2(
-                    presentation.BackBufferWidth - viewport.X,
-                    presentation.BackBufferHeight - viewport.Y
-                );
+            Viewport viewport = mGraphicsDevice.Viewport;
+            PresentationParameters presentation = mGraphicsDevice.PresentationParameters;
+            Vector2 coords = new Vector2(
+                presentation.BackBufferWidth - viewport.X,
+                presentation.BackBufferHeight - viewport.Y
+            );
 
-                mMax = ScreenToWorld(coords);
-            }
-            return mMax;
+            return ScreenToWorld(coords);
         }
     }
     /// <summary>
@@ -166,16 +149,7 @@ public class OrthographicCamera2D
     /// <summary>
     /// Defines the position of this camera.
     /// </summary>
-    public Vector2 Position
-    {
-        get => mPosition;
-        set
-        {
-            mPosition = value;
-            mDirtyMax = true;
-            mDirtyMax = true;
-        }
-    }
+    public Vector2 Position;
 
     /// <summary>
     /// <para>
@@ -425,7 +399,7 @@ public class OrthographicCamera2D
         PresentationParameters parameters = mGraphicsDevice.PresentationParameters;
 
         Matrix origin = GetOrigin(parameters.BackBufferWidth, parameters.BackBufferHeight);
-        Matrix translation = GetTranslation(mPosition.X, mPosition.Y);
+        Matrix translation = GetTranslation(Position.X, Position.Y);
         Matrix zoom = GetScale(mZoom);
 
         SpriteBatchView = translation * zoom * origin;
@@ -453,14 +427,14 @@ public class OrthographicCamera2D
             origin = GetOrigin(viewport.Width, viewport.Height);
         }
 
-        Matrix translation = GetTranslation(mPosition.X, mPosition.Y);
+        Matrix translation = GetTranslation(Position.X, Position.Y);
         Matrix zoom = GetScale(mZoom);
 
         SpriteBatchView = mViewport is not null
             ? translation * zoom * mViewport.ScalingMatrix * origin
             : translation * zoom * origin;
 
-        Matrix physicsViewTranslation = Matrix.CreateTranslation(-mPosition.X * mInvPpm, -mPosition.Y * mInvPpm,
+        Matrix physicsViewTranslation = Matrix.CreateTranslation(-Position.X * mInvPpm, -Position.Y * mInvPpm,
             0f);
         Matrix physicsViewScale = GetScale(mZoom, mPpm);
         PhysicsDebugView = mViewport is not null
@@ -477,7 +451,7 @@ public class OrthographicCamera2D
         PresentationParameters parameters = mGraphicsDevice.PresentationParameters;
         Viewport viewport = mGraphicsDevice.Viewport;
         Matrix origin = GetOrigin(parameters.BackBufferWidth, parameters.BackBufferHeight, viewport.X, viewport.Y);
-        Matrix translation = GetTranslation(mPosition.X, mPosition.Y);
+        Matrix translation = GetTranslation(Position.X, Position.Y);
         Matrix zoom = GetScale(mZoom);
         SpriteBatchView = translation * zoom * mViewport.ScalingMatrix * origin;
     }
