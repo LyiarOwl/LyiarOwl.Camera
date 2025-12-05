@@ -63,10 +63,6 @@ public class OrthographicCamera2D
     {
         get
         {
-            // if (BasicEffect is not null)
-            // {
-            //     return ScreenToWorld(Vector2.One);
-            // }
             Viewport viewport = mGraphicsDevice.Viewport;
             PresentationParameters presentation = mGraphicsDevice.PresentationParameters;
             Vector2 coords = new Vector2(
@@ -290,16 +286,32 @@ public class OrthographicCamera2D
     {
         if (BasicEffect is null) return;
 
-        PresentationParameters parameters = mGraphicsDevice.PresentationParameters;
+        Matrix origin;
 
-        Projection = Matrix.CreateOrthographicOffCenter(0f, parameters.BackBufferWidth,
-            parameters.BackBufferHeight, 0f, 0f, 1f);
+        if (mViewport is null)
+        {
+            PresentationParameters parameters = mGraphicsDevice.PresentationParameters;
+            Projection = Matrix.CreateOrthographicOffCenter(0f, parameters.BackBufferWidth,
+                parameters.BackBufferHeight, 0f, 0f, 1f);
+            origin = Matrix.CreateTranslation(
+                parameters.BackBufferWidth * 0.5f,
+                parameters.BackBufferHeight * 0.5f,
+                0f
+            );
+        }
+        else
+        {
+            Viewport viewport = mViewport.Viewport;
+            Projection = Matrix.CreateOrthographicOffCenter(
+                0f, viewport.Width, viewport.Height, 0f, 0f, 1f
+            );
+            origin = Matrix.CreateTranslation(
+                viewport.Width * 0.5f,
+                viewport.Height * 0.5f,
+                0f
+            );
+        }
 
-        Matrix origin = Matrix.CreateTranslation(
-            parameters.BackBufferWidth * 0.5f,
-            parameters.BackBufferHeight * 0.5f,
-            0f
-        );
         Matrix translation = Matrix.CreateTranslation(-Position.X, -Position.Y, 0f);
         Matrix zoom = Matrix.CreateScale(Zoom);
 
