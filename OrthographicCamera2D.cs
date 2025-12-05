@@ -42,8 +42,8 @@ public class OrthographicCamera2D
 
 
     #region Dirty flags
-    private bool mDirtyMin;
-    private bool mDirtyMax;
+    private bool mDirtyMin = true;
+    private bool mDirtyMax = true;
     #endregion
 
 
