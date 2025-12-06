@@ -196,6 +196,7 @@ public class OrthographicCamera2D
     public OrthographicCamera2D(GraphicsDevice graphicsDevice)
     {
         mGraphicsDevice = graphicsDevice;
+	Update();
     }
     /// <summary>
     /// <para>
@@ -213,7 +214,10 @@ public class OrthographicCamera2D
     /// <para>Shorthand for: <code>OrthographicCamera(graphicsDevice, null, viewport)</code></para>
     /// </summary>
     public OrthographicCamera2D(GraphicsDevice graphicsDevice, FitViewport viewport)
-    : this(graphicsDevice, null, viewport) { }
+    : this(graphicsDevice, null, viewport) 
+    {
+  	Update(); 
+    }
 
     /// <summary>
     /// <para>
@@ -245,7 +249,10 @@ public class OrthographicCamera2D
     /// <para><seealso href="https://github.com/Genbox/VelcroPhysics"/></para>
     /// </summary>
     public OrthographicCamera2D(GraphicsDevice graphicsDevice, BasicEffect basicEffect)
-    : this(graphicsDevice, basicEffect, null) { }
+    : this(graphicsDevice, basicEffect, null) 
+    {
+    	Update();
+    }
 
     /// <summary>
     /// <para>
