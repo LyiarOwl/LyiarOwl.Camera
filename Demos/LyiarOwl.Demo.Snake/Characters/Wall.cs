@@ -7,30 +7,26 @@ using MonoGame.Extended;
 
 namespace LyiarOwl.Demo.Snake.Characters;
 
-public class Wall
+public class Wall : PhysicalEntity2D
 {
-    private Color _color = new Color(64, 64, 64);
+    private readonly Color _color = new Color(64, 64, 64);
 
-    public Body Body;
-    public Vector2 Size;
-    public Vector2 Position
+    /// <param name="x">Position in pixels.</param>
+    /// <param name="y">Position in pixels.</param>
+    /// <param name="width">Size in pixels.</param>
+    /// <param name="height">Size in pixels.</param>
+    public Wall(float x, float y, float width, float height)
     {
-        get => Body.Position * WorldManager.PPM;
-        set => Body.Position = value / WorldManager.PPM;
+        Size = new Vector2(width, height);
+        Body = BodyFactory.CreateRectangle(
+            WorldManager.Instance.World,
+            PhysicalSize.X, PhysicalSize.Y,
+            1f, default, 0f, BodyType.Static
+        );
+        Position = new Vector2(x, y);
+        Body.UserData = Tags.Obstacle;
     }
-    public Vector2 PhysicalPosition
-    {
-        get => Body.Position;
-        set => Body.Position = value;
-    }
-    public Wall(float physicalX, float physicalY, float physicalWidth, float physicalHeight)
-    {
-        Size = new Vector2(physicalWidth * WorldManager.PPM, physicalHeight * WorldManager.PPM);
-        Body = BodyFactory.CreateRectangle(WorldManager.Instance.World, physicalWidth, physicalHeight, 1f,
-        new Vector2(physicalX, physicalY), 0f, BodyType.Static);
-        Body.UserData = new UserData("Obstacle");
-    }
-    public void Draw(SpriteBatch batch)
+    public override void Draw(SpriteBatch batch)
     {
         batch.FillRectangle(
             Position - Size * 0.5f,

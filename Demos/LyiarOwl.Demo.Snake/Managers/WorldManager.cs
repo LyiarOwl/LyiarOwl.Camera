@@ -14,8 +14,7 @@ public class WorldManager
     private float _accumulator;
 
     public static WorldManager Instance { get; private set; }
-    public const float TIME_STEP = 1f / 16f;
-    public const float PPM = 32f;
+ 
     public World World { get; private set; }
     public DebugView DebugView { get; private set; }
     public event Action CustomDraw;
@@ -33,12 +32,12 @@ public class WorldManager
     {
         float frameTime = MathF.Min(Time.DeltaTime, 0.25f);
         _accumulator += frameTime;
-        while (_accumulator >= TIME_STEP)
+        while (_accumulator >= Constants.TIME_STEP)
         {
-            World.Step(TIME_STEP);
-            Time.FixedDeltaTime = TIME_STEP;
+            World.Step(Constants.TIME_STEP);
+            Time.FixedDeltaTime = Constants.TIME_STEP;
             FixedUpdate?.Invoke();
-            _accumulator -= TIME_STEP;
+            _accumulator -= Constants.TIME_STEP;
         }
     }
     public void Draw(OrthographicCamera2D camera)

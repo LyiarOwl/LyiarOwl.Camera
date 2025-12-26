@@ -1,5 +1,4 @@
 using Genbox.VelcroPhysics.Dynamics;
-using LyiarOwl.Camera;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using MonoGame.Extended;
@@ -14,26 +13,16 @@ namespace LyiarOwl.Demo.Snake.Characters;
 
 public class SnakeHead : PhysicalEntity2D
 {
-    private List<PhysicalEntity2D> _segments;
-    public Vector2 Direction;
-    // public Body Body;
-    // public Vector2 Size;
-    // public Vector2 Position
-    // {
-    //     get => Body.Position * _camera.Ppm;
-    //     set => Body.Position = value / _camera.Ppm;
-    // }
-    // public Vector2 PhysicalPosition
-    // {
-    //     get => Body.Position;
-    //     set => Body.Position = value;
-    // }
+    private readonly List<PhysicalEntity2D> _segments;
+    private Vector2 _direction;
     public SnakeHead()
     {
         World world = WorldManager.Instance.World;
         Size = new Vector2(32f, 32f);
-        Body = BodyFactory.CreateRectangle(world, 0.75f, 0.75f, 1f, default, 0f, BodyType.Dynamic);
-        Body.UserData = new UserData("Player"); /* this UserData goes to the body */
+        Body = BodyFactory.CreateRectangle(
+            world, 0.75f, 0.75f, 1f, default, 0f, BodyType.Dynamic
+        );
+        Body.UserData = Tags.Player; /* this UserData goes to the body */
         Body.FixtureList[0].IsSensor = true;
         Body.OnCollision += OnCollisionEnter;
 
@@ -44,13 +33,13 @@ public class SnakeHead : PhysicalEntity2D
     {
         if (fixtureB.Body != null)
         {
-            if (fixtureB.Body.UserData is UserData userData)
+            if (fixtureB.Body.UserData != null && fixtureB.Body.UserData is string tag)
             {
-                if (userData.Tag == "Fruit")
+                if (tag == Tags.Fruit)
                 {
                     Grow();
                 }
-                if (userData.Tag == "Obstacle")
+                if (tag == Tags.Obstacle)
                 {
                     ResetState();
                 }
@@ -58,16 +47,13 @@ public class SnakeHead : PhysicalEntity2D
         }
     }
 
-    public override void Update()
+    public override void FixedUpdate()
     {
         AssignDirection();
         
-        for (int i = _segments.Count - 1; i > 0; i--)
-        {
-            _segments[i].PhysicalPosition = _segments[i - 1].PhysicalPosition;
-        }
+        UpdateSegmentsPosition();
         
-        PhysicalPosition = GetRoundedPosition(PhysicalPosition + Direction);
+        PhysicalPosition = GetRoundedPosition(PhysicalPosition + _direction);
         Body.Awake = true;
         ContactManagerExt.FindNewContacts();
     }
@@ -100,13 +86,13 @@ public class SnakeHead : PhysicalEntity2D
     {
         var keyboard = InputManager.Instance.Keyboard;
         if (keyboard.IsKeyDown(Keys.A))
-            Direction = -Vector2.UnitX;
+            _direction = -Vector2.UnitX;
         if (keyboard.IsKeyDown(Keys.D))
-            Direction = Vector2.UnitX;
+            _direction = Vector2.UnitX;
         if (keyboard.IsKeyDown(Keys.W))
-            Direction = -Vector2.UnitY;
+            _direction = -Vector2.UnitY;
         if (keyboard.IsKeyDown(Keys.S))
-            Direction = Vector2.UnitY;
+            _direction = Vector2.UnitY;
     }
     private void ResetState()
     {
@@ -117,6 +103,13 @@ public class SnakeHead : PhysicalEntity2D
         _segments.Clear();
         _segments.Add(this);
         PhysicalPosition = Vector2.Zero;
-        Direction = Vector2.Zero;
+        _direction = Vector2.Zero;
+    }
+    private void UpdateSegmentsPosition()
+    {
+        for (int i = _segments.Count - 1; i > 0; i--)
+        {
+            _segments[i].PhysicalPosition = _segments[i - 1].PhysicalPosition;
+        }
     }
 }

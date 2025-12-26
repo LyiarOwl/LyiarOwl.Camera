@@ -8,23 +8,35 @@ namespace LyiarOwl.Demo.Snake.Characters;
 public class PhysicalEntity2D
 {
     public Body Body;
+    /// <summary>
+    /// Size in pixels.
+    /// </summary>
     public Vector2 Size;
+    /// <summary>
+    /// <para>Size in meters.</para>
+    /// </summary>
     public Vector2 PhysicalSize
     {
-        get => Size / WorldManager.PPM;
-        set => Size = value * WorldManager.PPM;
+        get => Size / Constants.PPM;
+        set => Size = value * Constants.PPM;
     }
+    /// <summary>
+    /// Position in pixels.
+    /// </summary>
     public Vector2 Position
     {
-        get => Body.Position * WorldManager.PPM;
-        set => Body.Position = value / WorldManager.PPM;
+        get => Body.Position * Constants.PPM;
+        set => Body.Position = value / Constants.PPM;
     }
+    /// <summary>
+    /// Position in meters.
+    /// </summary>
     public Vector2 PhysicalPosition
     {
         get => Body.Position;
         set => Body.Position = value;
     }
-    public virtual void Update()
+    public virtual void FixedUpdate()
     {
         
     }

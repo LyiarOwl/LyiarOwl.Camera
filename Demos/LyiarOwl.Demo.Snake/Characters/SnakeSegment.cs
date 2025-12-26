@@ -11,10 +11,10 @@ public class SnakeSegment : PhysicalEntity2D
 {
     public SnakeSegment()
     {
-        Size = new Vector2(28f, 28f);
+        Size = new Vector2(20f, 20f);
         Body = BodyFactory.CreateRectangle(WorldManager.Instance.World, 0.75f, 0.75f, 
             1f, default, 0f, BodyType.Dynamic);
-        Body.UserData = new UserData("Obstacle");
+        Body.UserData = Tags.Obstacle;
     }
     public override void Draw(SpriteBatch batch)
     {

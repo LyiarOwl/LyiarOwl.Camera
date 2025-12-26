@@ -14,19 +14,6 @@ public class Fruit : PhysicalEntity2D
     private Color _color = new Color(255, 40, 88);
     private readonly RectangleF _fruitArea;
 
-    // public Body Body;
-    // public Vector2 Size;
-    // public Vector2 Position
-    // {
-    //     get => Body.Position * WorldManager.PPM;
-    //     set => Body.Position = value / WorldManager.PPM;
-    // }
-    // public Vector2 PhysicalPosition
-    // {
-    //     get => Body.Position;
-    //     set => Body.Position = value;
-    // }
-
     public Fruit(RectangleF fruitArea)
     {
         _fruitArea = fruitArea;
@@ -34,8 +21,8 @@ public class Fruit : PhysicalEntity2D
         Body = BodyFactory.CreateRectangle(world, 0.75f, 0.75f, 1f,
             new Vector2(-10f, 0f), 0f, BodyType.Static);
         Body.FixtureList[0].IsSensor = true;
-        Body.UserData = new UserData("Fruit");
-        Size = new Vector2(32f);
+        Body.UserData = Tags.Fruit;
+        Size = new Vector2(Constants.PPM);
         Body.OnCollision += OnCollisionEnter;
         RandomizePosition();
     }
@@ -44,9 +31,9 @@ public class Fruit : PhysicalEntity2D
     {
         if (other.Body != null)
         {
-            if (other.Body.UserData is UserData userData)
+            if (other.Body.UserData != null && other.Body.UserData is string tag)
             {
-                if (userData.Tag == "Player")
+                if (tag == Tags.Player)
                 {
                     RandomizePosition();
                 }
@@ -65,8 +52,8 @@ public class Fruit : PhysicalEntity2D
     private void RandomizePosition()
     {
         var physicalFruitArea = new RectangleF(
-            _fruitArea.Position / WorldManager.PPM,
-            _fruitArea.Size / WorldManager.PPM
+            _fruitArea.Position / Constants.PPM,
+            _fruitArea.Size / Constants.PPM
         );
         PhysicalPosition = new Vector2(
             MathF.Round(Random.Shared.NextSingle(physicalFruitArea.Left, physicalFruitArea.Right)),
