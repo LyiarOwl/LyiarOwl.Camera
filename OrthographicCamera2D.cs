@@ -15,7 +15,7 @@ public class OrthographicCamera2D
     /// <seealso cref="Microsoft.Xna.Framework.Graphics.BasicEffect.TextureEnabled"/>
     /// <seealso cref="Microsoft.Xna.Framework.Graphics.BasicEffect.VertexColorEnabled"/>
     /// </summary>
-    /// <param name="graphicsDevice"></param>
+    /// <param name="graphicsDevice"></param>'
     /// <returns>A new instance of a <c>BasicEffect</c></returns>
     public static BasicEffect CreateDefaultEffect(GraphicsDevice graphicsDevice)
     {

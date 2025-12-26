@@ -1,0 +1,270 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>LyiarOwl.Camera</name>
+    </assembly>
+    <members>
+        <member name="T:LyiarOwl.Camera.FitViewport">
+            <summary>
+            <para>Always when a frame is rendered this viewport ensures that the frame be proportionally
+            scaled to fit the width or height of the window (adding letter or pillarboxing depending on
+            the current size of the window).</para>
+            <para>This class don't need a camera to work, that is, you can use it independently and project
+            your own camera.</para>
+            <para>Always when the image is rescaled, the change is stored in the <c>ScalingMatrix</c>
+            that you can use with your camera.</para>
+            </summary>
+        </member>
+        <member name="M:LyiarOwl.Camera.FitViewport.Apply">
+            <summary>
+            <para>Unless you're working on your own camera class or even want to use this
+            viewport without a camera, avoid calling this freely!</para>
+            <para>This method will be automatically called within the camera that is using it and also when the window is
+            resized (manually, when toggling fullscreen or maximizing).</para>
+            </summary>
+        </member>
+        <member name="M:LyiarOwl.Camera.OrthographicCamera2D.CreateDefaultEffect(Microsoft.Xna.Framework.Graphics.GraphicsDevice)">
+            <summary>
+            <para>
+            Creates a <c>BasicEffect</c> with <c>TextureEnabled</c> and <c>VertexColorEnabled</c> enabled.
+            </para>
+            <seealso cref="F:LyiarOwl.Camera.OrthographicCamera2D.BasicEffect"/>
+            <seealso cref="P:Microsoft.Xna.Framework.Graphics.BasicEffect.TextureEnabled"/>
+            <seealso cref="P:Microsoft.Xna.Framework.Graphics.BasicEffect.VertexColorEnabled"/>
+            </summary>
+            <param name="graphicsDevice"></param>
+            <returns>A new instance of a <c>BasicEffect</c></returns>
+        </member>
+        <member name="P:LyiarOwl.Camera.OrthographicCamera2D.Min">
+            <summary>
+            <para>Is the top-left corner of the visible area in the screen.</para>
+            <para>Shorthand for: <code>new Vector2(Left, Top)</code></para>
+            </summary>
+        </member>
+        <member name="P:LyiarOwl.Camera.OrthographicCamera2D.Max">
+            <summary>
+            <para>Is the bottom-right corner of the visible area in the screen.</para>
+            <para>Shorthand for: <code>new Vector2(Right, Bottom)</code></para>
+            </summary>
+        </member>
+        <member name="P:LyiarOwl.Camera.OrthographicCamera2D.Left">
+            <summary>
+            <para>Is the left side of the visible area in the screen.</para>
+            <para>Shorthand for: <code>Min.X</code></para>
+            </summary>
+        </member>
+        <member name="P:LyiarOwl.Camera.OrthographicCamera2D.Right">
+            <summary>
+            <para>Is the right side of the visible area in the screen.</para>
+            <para>Shorthand for: <code>Max.X</code></para>
+            </summary>
+        </member>
+        <member name="P:LyiarOwl.Camera.OrthographicCamera2D.Top">
+            <summary>
+            <para>Is the top side of the visible area in the screen.</para>
+            <para>Shorthand for: <code>Min.Y</code></para>
+            </summary>
+        </member>
+        <member name="P:LyiarOwl.Camera.OrthographicCamera2D.Bottom">
+            <summary>
+            <para>Is the bottom side of the visible area in the screen.</para>
+            <para>Shorthand for: <code>Max.Y</code></para>
+            </summary>
+        </member>
+        <member name="P:LyiarOwl.Camera.OrthographicCamera2D.Width">
+            <summary>
+            <para>Is the width of the visible area in the screen.</para>
+            <para>Shorthand for: <code>Abs(Left - Right)</code></para>
+            </summary>
+        </member>
+        <member name="P:LyiarOwl.Camera.OrthographicCamera2D.Height">
+            <summary>
+            <para>Is the height of the visible area in the screen.</para>
+            <para>Shorthand for: <code>Abs(Top - Bottom)</code></para>
+            </summary>
+        </member>
+        <member name="F:LyiarOwl.Camera.OrthographicCamera2D.Projection">
+            <summary>
+            <para>This is a <c>OrthographicOffCenter</c> projection.</para>
+            <para>If you are using some effect (like the <c>BasicEffect</c>), this projection
+            must be used.</para>
+            </summary>
+        </member>
+        <member name="F:LyiarOwl.Camera.OrthographicCamera2D.SpriteBatchView">
+            <summary>
+            This View must be applied to the <c>transformMatrix</c> from the <c>SpriteBatch</c>
+            or to the <c>View</c> attribute from your effect (like the <c>BasicEffect</c>).
+            </summary>
+        </member>
+        <member name="P:LyiarOwl.Camera.OrthographicCamera2D.TransformMatrix">
+            <summary>
+            <para>This View must be applied to the <c>transformMatrix</c> from the <c>SpriteBatch</c>
+            or to the <c>View</c> attribute from your effect (like the <c>BasicEffect</c>).</para>
+            <para>Shorthand for: <b>getter for SpriteBatchView</b></para>
+            </summary>
+        </member>
+        <member name="F:LyiarOwl.Camera.OrthographicCamera2D.PhysicsDebugView">
+            <summary>
+            This view is only useful if you are using the debug view from some physics engine
+            like Aether Physics or Velcro's Physics. 
+            </summary>
+        </member>
+        <member name="P:LyiarOwl.Camera.OrthographicCamera2D.Zoom">
+            <summary>
+            <para>Defines the zoom of this camera.</para>
+            <para>Defaults: <b>0.1 (minimal), 1 (default)</b></para>
+            </summary>
+        </member>
+        <member name="F:LyiarOwl.Camera.OrthographicCamera2D.Position">
+            <summary>
+            Defines the position of this camera.
+            </summary>
+        </member>
+        <member name="P:LyiarOwl.Camera.OrthographicCamera2D.Ppm">
+            <summary>
+            <para>
+            Define the scale in which the <c>PhysicsDebugView</c> will be scaled. That is, how much pixels will be
+            equivalent to 1 meters.
+            </para>
+            <para>Defaults: <b>1 (minimal), 16 (default)</b></para>
+            </summary>
+        </member>
+        <member name="M:LyiarOwl.Camera.OrthographicCamera2D.#ctor(Microsoft.Xna.Framework.Graphics.GraphicsDevice)">
+            <summary>
+            <para>
+            Initializes an orthographic camera with an extensive view, that is, when the window is
+            resized, more or less pixels will be visible.</para>
+            <para>
+            Can be used in the simplest way, that is, you can pass the <c>TransformMatrix</c>
+            (or <c>SpriteBatchView</c>, both are the same) directly to the <c>transformMatrix</c> parameter of your
+            <c>SpriteBatch</c>.
+            </para>
+            <para>Make sure to call <c>Update</c>.</para>
+            <para>Shorthand for: <code>OrthographicCamera(graphicsDevice, null, null)</code></para>
+            </summary>
+        </member>
+        <member name="M:LyiarOwl.Camera.OrthographicCamera2D.#ctor(Microsoft.Xna.Framework.Graphics.GraphicsDevice,LyiarOwl.Camera.FitViewport)">
+            <summary>
+            <para>
+            Initializes an orthographic camera using a fit viewport, that is, when the window is
+            resized, the same amount of pixels will remain visible.</para>
+            <para>
+            Can be used in the simplest way, that is, you can pass the <c>TransformMatrix</c>
+            (or <c>SpriteBatchView</c>, both are the same) directly to the <c>transformMatrix</c> parameter of your
+            <c>SpriteBatch</c>.
+            </para>
+            <para>
+            Make sure to call <c>Update</c> and also set the <c>Viewport</c> of your <c>GraphicsDevice</c> to use
+            the <c>Viewport</c> being defined in this camera.
+            </para>
+            <para>Shorthand for: <code>OrthographicCamera(graphicsDevice, null, viewport)</code></para>
+            </summary>
+        </member>
+        <member name="M:LyiarOwl.Camera.OrthographicCamera2D.#ctor(Microsoft.Xna.Framework.Graphics.GraphicsDevice,Microsoft.Xna.Framework.Graphics.BasicEffect)">
+            <summary>
+            <para>
+            Initializes an orthographic camera with an extensive view, that is, when the window is
+            resized, the same amount of pixels will remain visible.
+            </para>
+            
+            <para>
+            By using a <c>BasicEffect</c>, a <c>Projection</c> is processed internally and can be used
+            with anything that needs a projection matrix. Essentially this projection is provided to give support
+            to the <b>DebugView</b> from <b>Aether.Physics</b>, <b>Velcro's Physics</b> (and/or any physics library
+            that derives from this same debug view).
+            </para>
+            
+            <para>
+            In addition to the <c>TransformMatrix</c> (or <c>SpriteBatchView</c>, both are the same) a 
+            <c>PhysicsDebugView</c> is also provided to be used with the draw method of the physics engine debug view.
+            </para>
+            
+            <para>
+            Make sure to call <c>Update</c>, pass the <c>BasicEffect</c> defined in this camera to the <c>effect</c>
+            parameter of your <c>SpriteBatch</c> and also change the <c>Ppm</c> property of this camera according with
+            the scale unit (in pixels) you are working.
+            </para>
+            
+            <para>Shorthand for: <code>OrthographicCamera(graphicsDevice, basicEffect, null)</code></para>
+            
+            <para><seealso href="https://github.com/nkast/Aether.Physics2D"/></para>
+            <para><seealso href="https://github.com/Genbox/VelcroPhysics"/></para>
+            </summary>
+        </member>
+        <member name="M:LyiarOwl.Camera.OrthographicCamera2D.#ctor(Microsoft.Xna.Framework.Graphics.GraphicsDevice,Microsoft.Xna.Framework.Graphics.BasicEffect,LyiarOwl.Camera.FitViewport)">
+            <summary>
+            <para>
+            Initializes an orthographic camera with an extensive view, that is, when the window is
+            resized, the same amount of pixels will remain visible.
+            </para>
+            
+            <para>
+            By using a <c>BasicEffect</c>, a <c>Projection</c> is processed internally and can be used
+            with anything that needs a projection matrix. Essentially this projection is provided to give support
+            to the <b>DebugView</b> from <b>Aether.Physics</b>, <b>Velcro's Physics</b> (and/or any physics library
+            that derives from this same debug view).
+            </para>
+            
+            <para>
+            In addition to the <c>TransformMatrix</c> (or <c>SpriteBatchView</c>, both are the same) a 
+            <c>PhysicsDebugView</c> is also provided to be used with the draw method of the physics engine debug view.
+            </para>
+            
+            <para>
+            Make sure to call <c>Update</c>, pass the <c>BasicEffect</c> defined in this camera to the <c>effect</c>
+            parameter of your <c>SpriteBatch</c>, set the <c>Viewport</c> of your <c>GraphicsDevice</c> to use the 
+            <c>Viewport</c> being defined in this camera and also change the <c>Ppm</c> property of this camera 
+            according with the scale unit (in pixels) you are working.
+            </para>
+            
+            <para><seealso href="https://github.com/nkast/Aether.Physics2D"/></para>
+            <para><seealso href="https://github.com/Genbox/VelcroPhysics"/></para>
+            </summary>
+        </member>
+        <member name="M:LyiarOwl.Camera.OrthographicCamera2D.ScreenToNDC(Microsoft.Xna.Framework.Vector2)">
+            <summary>
+            <para>Converts from <b>Screen Coordinates</b> to <b>Normalized Device Coordinates</b>.</para>
+            <para><c>BasicEffect</c> must be defined for this method to work.</para>
+            <para>Shorthand for: <code>ScreenToNDC(screenPosition.X, screenPosition.Y)</code></para>
+            </summary>
+        </member>
+        <member name="M:LyiarOwl.Camera.OrthographicCamera2D.ScreenToNDC(System.Single,System.Single)">
+            <summary>
+            <para>Converts from <b>Screen Coordinates</b> to <b>Normalized Device Coordinates</b>.</para>
+            <para><c>BasicEffect</c> must be defined for this method to work.</para>
+            </summary>
+            <param name="screenX">X coordinates in the screen space.</param>
+            <param name="screenY">Y coordinates in the screen space.</param>
+        </member>
+        <member name="M:LyiarOwl.Camera.OrthographicCamera2D.ClipToView(Microsoft.Xna.Framework.Vector2,System.Single,System.Single)">
+            <summary>
+            <para>Converts from <b>Clip Coordinates</b> to <b>View Coordinates</b>.</para>
+            <para>This method uses <c>ScreenToNDC</c> internally.</para>
+            <para><c>BasicEffect</c> must be defined for this method to work.</para>
+            <para>Shorthand for: <code>ClipToView(ndc.X, ndc.Y)</code></para>
+            </summary>
+        </member>
+        <member name="M:LyiarOwl.Camera.OrthographicCamera2D.ClipToView(System.Single,System.Single,System.Single,System.Single)">
+            <summary>
+            <para>Converts from <b>Clip Coordinates</b> to <b>View Coordinates</b>.</para>
+            <para>This method uses <c>ScreenToNDC</c> internally.</para>
+            <para><c>BasicEffect</c> must be defined for this method to work.</para>
+            </summary>
+        </member>
+        <member name="M:LyiarOwl.Camera.OrthographicCamera2D.ScreenToWorld(System.Single,System.Single)">
+            <summary>
+            <para>Converts from <b>Screen Coordinates</b> to <b>World Coordinates</b>.</para>
+            <para>The result will be different if you'd set a <c>BasicEffect</c> for this camera.</para>
+            <para>This method uses <c>ScreenToNDC</c> and <c>ClipToView</c> internally.</para>
+            <para>Shorthand for: <code>ScreenToWorld(new Vector2(x, y))</code></para>
+            </summary>
+        </member>
+        <member name="M:LyiarOwl.Camera.OrthographicCamera2D.ScreenToWorld(Microsoft.Xna.Framework.Vector2)">
+            <summary>
+            <para>Converts from <b>Screen Coordinates</b> to <b>World Coordinates</b>.</para>
+            <para>The result will be different if you'd set a <c>BasicEffect</c> for this camera.</para>
+            <para>This method uses <c>ScreenToNDC</c> and <c>ClipToView</c> internally.</para>
+            </summary>
+        </member>
+    </members>
+</doc>
