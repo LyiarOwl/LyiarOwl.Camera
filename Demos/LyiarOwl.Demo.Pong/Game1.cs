@@ -52,8 +52,8 @@ public class Game1 : Game
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
 
-        IsFixedTimeStep = true;
         TargetElapsedTime = TimeSpan.FromSeconds(Constants.TARGET_ELAPSED_TIME);
+        IsFixedTimeStep = true;
         Time.DeltaTime = (float)Constants.TARGET_ELAPSED_TIME;
 
         Window.AllowUserResizing = true;
@@ -80,9 +80,7 @@ public class Game1 : Game
             Ppm = Constants.PPM,
             Zoom = 0.725f
         };
-        _camera.Update(); 
-        /* this call is necessary because we are changing Zoom and PPM and PreRenderDashedDivider needs
-         updated data from the camera */
+        _camera.Update(); /* Apply PPM and Zoom changes. */
         PreRenderDashedDivider();
 
         /* walls */
@@ -130,14 +128,16 @@ public class Game1 : Game
         GraphicsDevice.Clear(Color.Black);
 
         _spriteBatch.Begin(samplerState: SamplerState.PointClamp, effect: _basicEffect);
+
         _spriteBatch.Draw(_dashedLine, new Vector2(-2f, _camera.Top - 13f), Color.White);
         _playerPaddle.Draw(_spriteBatch);
         _cpuPaddle.Draw(_spriteBatch);
         _ball.Draw(_spriteBatch);
         DrawUI();
+        
         _spriteBatch.End();
         
-        _worldManager.Draw(_camera);
+        // _worldManager.Draw(_camera); /* uncomment to render the physics engine debug */
 
         base.Draw(gameTime);
     }
@@ -155,6 +155,7 @@ public class Game1 : Game
             SpriteEffects.None,
             0f
         );
+        
         /* cpu score */
         _spriteBatch.DrawString(
             _gameFont,
@@ -163,6 +164,10 @@ public class Game1 : Game
             Color.White
         );
     }
+    /// <summary>
+    /// Pre-render the dashed line in a render target.
+    /// </summary>
+    /// <param name="thickness"></param>
     private void PreRenderDashedDivider(float thickness = 8f)
     {
         const float lineHeight = 30f;

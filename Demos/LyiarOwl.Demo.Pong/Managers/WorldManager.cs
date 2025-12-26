@@ -1,9 +1,9 @@
 using System;
-using System.Numerics;
 using Genbox.VelcroPhysics.Dynamics;
 using Genbox.VelcroPhysics.Extensions.DebugView;
 using Genbox.VelcroPhysics.MonoGame.DebugView;
 using LyiarOwl.Camera;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -27,15 +27,14 @@ namespace LyiarOwl.Demo.Pong.Managers
         }
         public void Update()
         {
-            /* avoiding spiral of death */
             float frameTime = MathF.Min(Time.DeltaTime, 0.25f);
             _accumulator += frameTime;
-            while (_accumulator >= Constants.WORLD_STEP)
+            while (_accumulator >= Constants.TIME_STEP)
             {
-                World.Step(Constants.WORLD_STEP);
-                Time.FixedDeltaTime = Constants.WORLD_STEP;
+                World.Step(Constants.TIME_STEP);
+                Time.FixedDeltaTime = Constants.TIME_STEP;
                 FixedUpdate?.Invoke();
-                _accumulator -= Constants.WORLD_STEP;
+                _accumulator -= Constants.TIME_STEP;
             }
         }
         public void Draw(OrthographicCamera2D camera)

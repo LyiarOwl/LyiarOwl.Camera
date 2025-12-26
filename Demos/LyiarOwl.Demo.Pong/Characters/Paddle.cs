@@ -14,6 +14,8 @@ namespace LyiarOwl.Demo.Pong.Characters
     {
         private Vector2 _lockPhysicalPosition;
         protected float Speed = 10f;
+        /// <param name="x">Position in pixels.</param>
+        /// <param name="y">Position in pixels.</param>
         public Paddle(float x, float y, string tag = null) : base(20f, 150f)
         {
             Body = BodyFactory.CreateRectangle(
@@ -32,7 +34,6 @@ namespace LyiarOwl.Demo.Pong.Characters
             Position = new Vector2(x, y);
             _lockPhysicalPosition = PhysicalPosition;
         }
-        public override void Update() {}
         public override void FixedUpdate()
         {
             LockX();

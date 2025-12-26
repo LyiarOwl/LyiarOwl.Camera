@@ -5,14 +5,13 @@ namespace LyiarOwl.Demo.Pong.Characters
    public class CPUPaddle : Paddle
     {
         private readonly Ball _ball;
+        /// <param name="x">Position in pixels.</param>
+        /// <param name="y">Position in pixels.</param>
         public CPUPaddle(float x, float y, Ball ball) : base(x, y, Tags.CPUPaddle)
         {
             _ball = ball;
         }
 
-        public override void Update()
-        {
-        }
         public override void FixedUpdate()
         {
             /* move towards ball */

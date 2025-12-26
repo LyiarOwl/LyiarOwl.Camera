@@ -1,4 +1,4 @@
-namespace LyiarOwl.Demo.Pong.Characters
+namespace LyiarOwl.Demo.Pong
 {
     public class Tags
     {

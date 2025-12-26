@@ -9,6 +9,8 @@ namespace LyiarOwl.Demo.Pong.Characters
     public class PlayerPaddle : Paddle
     {
         private float _yAxis;
+        /// <param name="x">Position in pixels.</param>
+        /// <param name="y">Position in pixels.</param>
         public PlayerPaddle(float x, float y) : base(x, y, Tags.PlayerPaddle)
         {
         }

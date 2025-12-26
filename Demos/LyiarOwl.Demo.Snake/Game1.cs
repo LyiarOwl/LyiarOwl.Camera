@@ -35,8 +35,9 @@ public class Game1 : Game
         _graphics = new GraphicsDeviceManager(this);
         Content.RootDirectory = "Content";
         IsMouseVisible = true;
-        TargetElapsedTime = TimeSpan.FromSeconds(1d / 60d); /* 1sec / 60 FPS */
+        TargetElapsedTime = TimeSpan.FromSeconds(Constants.TARGET_ELAPSED_TIME); /* 1sec / 60 FPS */
         IsFixedTimeStep = true; /* limit the maximum 'fps' (maximum 'fps' is defined in TargetElapsedTime) */
+        Time.DeltaTime = (float)Constants.TARGET_ELAPSED_TIME;
         Window.AllowUserResizing = true;
     }
 
